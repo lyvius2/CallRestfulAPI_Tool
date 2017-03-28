@@ -1,0 +1,14 @@
+{
+    "name": "DataSelectorAndRequestRestfulAPI",
+    "dependencies": {
+        "electron": "^1.6.4"
+    },
+    "scripts": {
+        "start": "electron ."
+    },
+    "main": "main.js",
+    "version": "0.0.0",
+    "license": "MIT",
+    "description": "Simple Tool. (Using the Python, Node.js, Electron)",
+    "author": "walter.hwang"
+}
