@@ -2,7 +2,7 @@
 <html>
 <head>
 	<meta charset="UTF-8">
-	<title>Hello World!</title>
+	<title>Restful API Tool</title>
 	<link rel="stylesheet" href="assets/css/variables.css">
 	<link rel="stylesheet" href="assets/css/nativize.css">
 	<link rel="stylesheet" href="assets/css/global.css">
@@ -19,39 +19,41 @@
 			<svg class="nav-header-icon"><use xlink:href="assets/img/icons.svg#icon-electron"></use></svg>
 		</header>
 
-		<div class="nav-item">
-			<h5 class="nav-category">
-				<svg class="nav-icon"><use xlink:href="assets/img/icons.svg#icon-native-ui"></use></svg>
-				DBMS
-			</h5>
-			<select class="nav-input" name="dbms" id="dbms">
-				<option value="mssql">MS SQL Server</option>
-				<option value="oracle">ORACLE DBMS</option>
-			</select>
-		</div>
+		<form name="sql">
+			<div class="nav-item">
+				<h5 class="nav-category">
+					<svg class="nav-icon"><use xlink:href="assets/img/icons.svg#icon-native-ui"></use></svg>
+					DBMS
+				</h5>
+				<select class="nav-input" name="dbms" id="dbms">
+					<option value="mssql">MS SQL Server</option>
+					<option value="oracle">ORACLE DBMS</option>
+				</select>
+			</div>
 
-		<div class="nav-item">
-			<h5 class="nav-category">
-				<svg class="nav-icon"><use xlink:href="assets/img/icons.svg#icon-menu"></use></svg>
-				Connection Config
-			</h5>
-			<div class="nav-input">
-				<div class="nav-left">HOST </div>
-				<div><input type="text" id="host"></div>
+			<div class="nav-item">
+				<h5 class="nav-category">
+					<svg class="nav-icon"><use xlink:href="assets/img/icons.svg#icon-menu"></use></svg>
+					Connection Config
+				</h5>
+				<div class="nav-input">
+					<div class="nav-left">HOST </div>
+					<div><input type="text" id="host"></div>
+				</div>
+				<div class="nav-input">
+					<div class="nav-left">DATABASE  </div>
+					<div><input type="text" id="database"></div>
+				</div>
+				<div class="nav-input">
+					<div class="nav-left">ID </div>
+					<div><input type="text" id="username"></div>
+				</div>
+				<div class="nav-input">
+					<div class="nav-left">PASSWORD </div>
+					<div><input type="password" id="password"></div>
+				</div>
 			</div>
-			<div class="nav-input">
-				<div class="nav-left">DATABASE  </div>
-				<div><input type="text" id="database"></div>
-			</div>
-			<div class="nav-input">
-				<div class="nav-left">ID </div>
-				<div><input type="text" id="username"></div>
-			</div>
-			<div class="nav-input">
-				<div class="nav-left">PASSWORD </div>
-				<div><input type="password" id="password"></div>
-			</div>
-		</div>
+		</form>
 
 		<footer class="nav-footer">
 			Developed by Walter.Hwang
@@ -80,7 +82,7 @@
 
 			<div class="demo">
 				<div class="demo-wrapper" style="text-align: center">
-					<textarea name="sql" id="" cols="30" rows="10" style="width: 100%;"></textarea>
+					<textarea name="query" id="query" cols="30" rows="10" style="width: 100%;"></textarea>
 					<div class="demo-controls">
 						<button class="demo-button" id="execute-sql">Action!</button>
 					</div>
