@@ -19,6 +19,10 @@ executeSqlBtn.addEventListener('click', function () {
 	ipc.send('execute-sql', new returnDbConfig(config))
 })
 
+ipc.on('execute-sql-reply', function (event, arg) {
+	document.getElementById('query').value = JSON.stringify(arg)
+})
+
 function returnDbConfig (config) {
 	this.host = config['host'].value
 	this.database = config['database'].value

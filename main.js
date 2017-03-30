@@ -57,5 +57,28 @@ app.on('activate', () => {
 const ipc = require('electron').ipcMain
 
 ipc.on('execute-sql', function (event, arg) {
-	console.log('arg', arg);
+	var argv = [arg['host'], arg['database'], arg['username'], arg['password'], arg['query']]
+	runPythonScript('selector.py', argv, function (data) {
+		event.sender.send('execute-sql-reply', data)
+	})
 })
+
+const python = require('python-shell')
+
+function runPythonScript (filename, argv, callback) {
+	var options = {
+		mode: 'text',
+		pythonPath: '',
+		pythonOptions: ['-u'],
+		scriptPath: './py',
+		args: argv
+	}
+	try {
+		python.run(filename, options, function (err, data) {
+			if (err) throw err
+			return callback({success: true, result: data})
+		});
+	} catch(e) {
+		return callback({success: false, err: e})
+	}
+}
