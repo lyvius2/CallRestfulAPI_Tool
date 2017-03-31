@@ -61,6 +61,7 @@ table {
   border-spacing: 0;
   border: 1px solid hsla(0,0%,0%,.08);
   border-width: 0 1px 1px 0;
+  margin-bottom: 5px;
 }
 th {
   background-color: hsla(0,0%,50%,.06);
@@ -140,12 +141,16 @@ kbd {
 .content {
   flex: 1;
   position: relative;
-  overflow: hidden;
-  visibility: hidden;
+  /*overflow: hidden;*/
+  overflow-x: auto;
+  overflow-y: auto;
+  /*visibility: hidden;*/
+  display: none;
   opacity: 0;
 }
 .content.is-shown {
-  visibility: visible;;
+  /*visibility: visible;*/
+  display: block;
   opacity: 1;
 }
 

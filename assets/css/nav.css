@@ -7,11 +7,13 @@
   color: var(--color-subtle);
   border-right: 1px solid var(--color-border);
   background-color: var(--color-bg);
-  visibility: hidden;
+  /*visibility: hidden;*/
+  display: none;
   opacity: 0;
 }
 .nav.is-shown {
-  visibility: visible;;
+  /*visibility: visible;*/
+  display: block;
   opacity: 1;
 }
 

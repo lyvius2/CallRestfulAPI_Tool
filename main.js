@@ -8,7 +8,7 @@ let win
 
 function createWindow () {
 	// Create the browser window.
-	win = new BrowserWindow({width: 1200, height: 600})
+	win = new BrowserWindow({width: 1280, height: 720})
 
 	// and load the index.html of the app.
 	win.loadURL(url.format({
@@ -61,6 +61,10 @@ ipc.on('execute-sql', function (event, arg) {
 	runPythonScript('selector.py', argv, function (data) {
 		event.sender.send('execute-sql-reply', data)
 	})
+})
+
+ipc.on('execute-api', function (event, arg) {
+	console.log('arg', arg)
 })
 
 const python = require('python-shell')

@@ -18,6 +18,11 @@
   margin: 0 auto;
   padding: 0 2rem;
 }
+.demo-wide-wrapper {
+  position: relative;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
 
 
 /* Toggle Button ----------------------------- */

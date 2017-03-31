@@ -11,8 +11,18 @@
 	<link rel="stylesheet" href="assets/css/section.css">
 	<link rel="stylesheet" href="assets/css/demo.css">
 	<link rel="stylesheet" href="assets/css/github.css">
+	<style>
+		table {
+			font: 12px "Lucida Grande", Helvetica, Arial, sans-serif;
+		}
+		input.params {
+			font: 12px "Lucida Grande", Helvetica, Arial, sans-serif;
+			border: 1px solid #999988;
+		}
+	</style>
 </head>
 <body>
+
 	<nav class="nav js-nav">
 		<header class="nav-header">
 			<h1 class="nav-title"><strong>Restful API</strong> Tool</h1>
@@ -38,19 +48,19 @@
 				</h5>
 				<div class="nav-input">
 					<div class="nav-left">HOST </div>
-					<div><input type="text" id="host"></div>
+					<div><input type="text" id="host" value=""></div>
 				</div>
 				<div class="nav-input">
 					<div class="nav-left">DATABASE  </div>
-					<div><input type="text" id="database"></div>
+					<div><input type="text" id="database" value=""></div>
 				</div>
 				<div class="nav-input">
 					<div class="nav-left">ID </div>
-					<div><input type="text" id="username"></div>
+					<div><input type="text" id="username" value=""></div>
 				</div>
 				<div class="nav-input">
 					<div class="nav-left">PASSWORD </div>
-					<div><input type="password" id="password"></div>
+					<div><input type="password" id="password" value=""></div>
 				</div>
 			</div>
 		</form>
@@ -59,7 +69,8 @@
 			Developed by Walter.Hwang
 		</footer>
 	</nav>
-	<main class="content js-content">
+
+	<main class="content js-content" id="sql">
 		<section class="js-section">
 			<header class="section-header">
 				<div class="section-wrapper">
@@ -90,6 +101,40 @@
 			</div>
 		</section>
 	</main>
+
+	<main class="content js-content" id="result">
+		<section class="js-section" id="list">
+			<header class="section-header">
+				<div class="section-wide-wrapper">
+					<h1>
+						<svg class="section-icon"><use xlink:href="assets/img/icons.svg#icon-native-ui"></use></svg>
+						EXECUTE QUERY RESULT
+					</h1>
+					<h3>쿼리 결과를 확인하세요.</h3>
+					<p>
+						METHOD
+						<select name="method" id="method">
+							<option value="get">GET</option>
+							<option value="post">POST</option>
+						</select>
+						&nbsp;&nbsp;
+						URL
+						<input type="text" name="url" id="url" style="width: 50%">
+					</p>
+				</div>
+			</header>
+
+			<div class="demo">
+				<div class="demo-wide-wrapper" style="text-align: center">
+					<div id="query-result"></div>
+					<div class="demo-controls">
+						<button class="demo-button" id="execute-api">Request API</button>
+					</div>
+				</div>
+			</div>
+		</section>
+	</main>
+
 	<script type="text/javascript">
 		require('./renderer')
 	</script>

@@ -37,6 +37,12 @@
   padding: 2rem 2rem 1rem 2rem;
   border-bottom: 1px solid var(--color-border);
 }
+.section-wide-wrapper {
+  position: relative;
+  margin: 0 auto;
+  padding: 2rem 2rem 1rem 2rem;
+  border-bottom: 1px solid var(--color-border);
+}
 @media (min-width: 940px) {
   .section-wrapper {
     padding-top: 4rem;
