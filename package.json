@@ -9,7 +9,7 @@
     "start": "electron ."
   },
   "main": "main.js",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "license": "MIT",
   "description": "Simple Tool. (Using the Python, Node.js, Electron)",
   "author": "walter.hwang"

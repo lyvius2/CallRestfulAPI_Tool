@@ -4,13 +4,10 @@
 	<meta charset="UTF-8">
 	<title>Restful API Tool</title>
 	<link rel="stylesheet" href="assets/css/variables.css">
-	<link rel="stylesheet" href="assets/css/nativize.css">
 	<link rel="stylesheet" href="assets/css/global.css">
-	<link rel="stylesheet" href="assets/css/about.css">
 	<link rel="stylesheet" href="assets/css/nav.css">
 	<link rel="stylesheet" href="assets/css/section.css">
 	<link rel="stylesheet" href="assets/css/demo.css">
-	<link rel="stylesheet" href="assets/css/github.css">
 	<style>
 		table {
 			font: 12px "Lucida Grande", Helvetica, Arial, sans-serif;
@@ -19,6 +16,8 @@
 			font: 12px "Lucida Grande", Helvetica, Arial, sans-serif;
 			border: 1px solid #999988;
 		}
+		.next {color: hsl(222, 53%, 50%)}
+		.prev {color: hsl(330, 65%, 48%)}
 	</style>
 </head>
 <body>
@@ -48,19 +47,19 @@
 				</h5>
 				<div class="nav-input">
 					<div class="nav-left">HOST </div>
-					<div><input type="text" id="host" value=""></div>
+					<div><input type="text" id="host"></div>
 				</div>
 				<div class="nav-input">
 					<div class="nav-left">DATABASE  </div>
-					<div><input type="text" id="database" value=""></div>
+					<div><input type="text" id="database"></div>
 				</div>
 				<div class="nav-input">
 					<div class="nav-left">ID </div>
-					<div><input type="text" id="username" value=""></div>
+					<div><input type="text" id="username"></div>
 				</div>
 				<div class="nav-input">
 					<div class="nav-left">PASSWORD </div>
-					<div><input type="password" id="password" value=""></div>
+					<div><input type="password" id="password"></div>
 				</div>
 			</div>
 		</form>
@@ -95,7 +94,7 @@
 				<div class="demo-wrapper" style="text-align: center">
 					<textarea name="query" id="query" cols="30" rows="10" style="width: 100%;"></textarea>
 					<div class="demo-controls">
-						<button class="demo-button" id="execute-sql">Action!</button>
+						<button class="demo-button next" id="execute-sql">Action!</button>
 					</div>
 				</div>
 			</div>
@@ -111,6 +110,8 @@
 						EXECUTE QUERY RESULT
 					</h1>
 					<h3>쿼리 결과를 확인하세요.</h3>
+					<p>Restful URL에 파라메터가 포함되어 있는 경우에는 파라메터 항목을 중괄호로 감싸 URL에 입력하십시오.<br/>
+						<code>예) URL에 'IDX'라는 파라메터가 포함될 경우. http://fakeURL.com/{IDX}.do</code></p>
 					<p>
 						METHOD
 						<select name="method" id="method">
@@ -128,7 +129,8 @@
 				<div class="demo-wide-wrapper" style="text-align: center">
 					<div id="query-result"></div>
 					<div class="demo-controls">
-						<button class="demo-button" id="execute-api">Request API</button>
+						<button class="demo-button prev" id="execute-back">＜ Back</button>
+						<button class="demo-button next" id="execute-api">Request API</button>
 					</div>
 				</div>
 			</div>

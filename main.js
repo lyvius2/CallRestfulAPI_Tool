@@ -1,10 +1,60 @@
-const {app, BrowserWindow} = require('electron')
+const {app, Menu, BrowserWindow} = require('electron')
 const path = require('path')
 const url = require('url')
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let win
+
+let template = [
+	{
+		label: 'Edit',
+		submenu: [
+			{role: 'undo'},
+			{role: 'redo'},
+			{type: 'separator'},
+			{role: 'cut'},
+			{role: 'copy'},
+			{role: 'paste'},
+			{role: 'delete'}
+		]
+	},
+	{
+		label: 'View',
+		submenu: [
+			{role: 'reload'},
+			{role: 'forcereload'},
+			{type: 'separator'},
+			{role: 'zoomin'},
+			{role: 'zoomout'},
+			{type: 'separator'},
+			{role: 'togglefullscreen'}
+		]
+	},
+	{
+		role: 'window',
+		submenu: [
+			{role: 'minimize'},
+			{role: 'close'}
+		]
+	},
+	{
+		role: 'help',
+		submenu: [
+			{label: 'Version 0.0.1'},
+			{type: 'separator'},
+			{label: 'GitHub',
+				click () {
+					require('electron').shell.openExternal('https://github.com/lyvius2/CallRestfulAPI_Tool')
+				}
+			}
+		]
+	}
+]
+
+template[3].submenu[0].enabled = false
+const menu = Menu.buildFromTemplate(template)
+Menu.setApplicationMenu(menu)
 
 function createWindow () {
 	// Create the browser window.
@@ -55,12 +105,42 @@ app.on('activate', () => {
 // code. You can also put them in separate files and require them here.
 
 const ipc = require('electron').ipcMain
+const dialog = require('electron').dialog
+
+function showInfoMessageBox (title, msg) {
+	const options = {
+		type: 'info',
+		title: title,
+		message: msg,
+	}
+	dialog.showMessageBox(options)
+}
+
+function validateQuery (query) {
+	let select_word_idx = query.toUpperCase().indexOf('SELECT')
+	let from_word_idx = query.toUpperCase().indexOf('FROM')
+	if (select_word_idx > -1 && (from_word_idx > select_word_idx)) return true
+	else return false
+}
+
+ipc.on('show-message-box', function (event, arg) {
+	showInfoMessageBox(arg['title'], arg['msg'])
+})
 
 ipc.on('execute-sql', function (event, arg) {
-	let argv = [arg['host'], arg['database'], arg['username'], arg['password'], arg['query']]
-	runPythonScript('selector.py', argv, function (data) {
-		event.sender.send('execute-sql-reply', data)
-	})
+	if (validateQuery(arg['query'])) {
+		let argv = [arg['host'], arg['database'], arg['username'], arg['password'], arg['query']]
+		runPythonScript('selector.py', argv, function (data) {
+			try {
+				if (!data.success) throw data.err
+				let parse_data = JSON.parse(data.result)
+				event.sender.send('execute-sql-reply', {success: true, result: parse_data})
+			} catch (e) {
+				dialog.showErrorBox('SQL 문을 수행하는 도중 오류가 발생하였습니다.',
+					e.toString() + '\nResponse Msg : ' + data['result'])
+			}
+		})
+	} else showInfoMessageBox('SQL 쿼리 체크', '조회 쿼리만 수행 가능합니다. 쿼리문에 SELECT와 FROM 키워드를 확인하세요.')
 })
 
 ipc.on('execute-api', function (event, arg) {
@@ -89,6 +169,7 @@ ipc.on('execute-api', function (event, arg) {
 
 	arg['params'].forEach(function (item, index) {
 		runPythonScript('requester.py', createArgv(item), function (data) {
+			data['index'] = index
 			event.sender.send('execute-api-reply', data)
 		})
 	})
@@ -104,12 +185,13 @@ function runPythonScript (filename, argv, callback) {
 		scriptPath: './py',
 		args: argv
 	}
-	try {
-		python.run(filename, options, function (err, data) {
+	python.run(filename, options, function (err, data) {
+		try {
 			if (err) throw err
-			return callback({success: true, result: eval(decodeURIComponent(data))})
-		})
-	} catch(e) {
-		return callback({success: false, err: e})
-	}
+			let decoded_result = eval(decodeURIComponent(data))
+			return callback({success: true, result: decoded_result})
+		} catch (e) {
+			return callback({success: false, err: e})
+		}
+	})
 }
