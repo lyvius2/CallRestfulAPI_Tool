@@ -57,14 +57,41 @@ app.on('activate', () => {
 const ipc = require('electron').ipcMain
 
 ipc.on('execute-sql', function (event, arg) {
-	var argv = [arg['host'], arg['database'], arg['username'], arg['password'], arg['query']]
+	let argv = [arg['host'], arg['database'], arg['username'], arg['password'], arg['query']]
 	runPythonScript('selector.py', argv, function (data) {
 		event.sender.send('execute-sql-reply', data)
 	})
 })
 
 ipc.on('execute-api', function (event, arg) {
-	console.log('arg', arg)
+	let param_url, is_param_url = false
+	let open_brace_index = arg['url'].indexOf('{')
+	let close_brace_index = arg['url'].indexOf('}')
+	if (open_brace_index > 0 && (close_brace_index > open_brace_index)) {
+		param_url = arg['url'].substring(open_brace_index + 1, close_brace_index)
+		for (var idx in arg['args']) {
+			if (arg['args'][idx] == param_url) {
+				is_param_url = true
+				break
+			}
+		}
+	}
+
+	function createArgv (item) {
+		if (!is_param_url) {
+			return [arg['method'], arg['url'], JSON.stringify(item)];
+		} else {
+			let url = arg['url'].replace('{' + param_url + '}', item[param_url])
+			delete item[param_url]
+			return [arg['method'], url, JSON.stringify(item)]
+		}
+	}
+
+	arg['params'].forEach(function (item, index) {
+		runPythonScript('requester.py', createArgv(item), function (data) {
+			event.sender.send('execute-api-reply', data)
+		})
+	})
 })
 
 const python = require('python-shell')
@@ -80,8 +107,8 @@ function runPythonScript (filename, argv, callback) {
 	try {
 		python.run(filename, options, function (err, data) {
 			if (err) throw err
-			return callback({success: true, result: data})
-		});
+			return callback({success: true, result: eval(decodeURIComponent(data))})
+		})
 	} catch(e) {
 		return callback({success: false, err: e})
 	}

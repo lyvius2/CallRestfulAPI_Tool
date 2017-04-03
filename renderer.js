@@ -53,7 +53,9 @@ executeApiBtn.addEventListener('click', function () {
 	ipc.send('execute-api', {
 		method: document.querySelector('select#method').value,
 		url: document.querySelector('input#url').value,
-		params: params})
+		params: params,
+		args: to_be_arg_name
+	})
 })
 
 function returnDbConfig (config) {
@@ -91,15 +93,15 @@ function viewQueryResult (query_result) {
 				let row = []
 				for (var item in obj) {
 					row.push(is_header?
-						h('th', [createChk(), h('br'), createInputText(item), h('br'), item]) : h('td', obj[item])
+						h('th', [createChk(), h('br'), createInputText(item)]) : h('td', obj[item])
 					)
 				}
 				return row
 			}
 			return h('table', [
 				h('thead', createRow(this.list[0], true)),
-				h('tbody', this.list.map(function (item) {
-					return h('tr', createRow(item, false))
+				h('tbody', this.list.map(function (item, index) {
+					return h('tr', {attrs: {'data-index': index}}, createRow(item, false))
 				}))
 			])
 		}

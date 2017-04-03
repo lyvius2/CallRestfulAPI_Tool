@@ -16,18 +16,25 @@ def return_matched_dict(cursor, row):
     return return_dict
 
 def execute_select_sql(sql, config):
-    cnxn = pyodbc\
-        .connect('DRIVER={driver};PORT=1433;SERVER={server};PORT=1433;DATABASE={database};UID={username};PWD={password}'
-                 .format(driver=driver, server=config['server'], database=config['database'], username=config['username'], password=config['password']))
-    cursor = cnxn.cursor()
-    cursor.execute(sql)
     rows = []
-    row = cursor.fetchone()
-    while row:
-        rows.append(return_matched_dict(cursor, row))
+    try:
+        cnxn = pyodbc \
+            .connect('DRIVER={driver};PORT=1433;SERVER={server};PORT=1433;DATABASE={database};charset=utf8;UID={username};PWD={password}'
+                     .format(driver=driver, server=config['server'], database=config['database'], username=config['username'], password=config['password']),
+                     unicode_results=True)
+        cursor = cnxn.cursor()
+        cursor.execute(sql)
         row = cursor.fetchone()
-    cnxn.close()
-    return rows
+        while row:
+            rows.append(return_matched_dict(cursor, row))
+            row = cursor.fetchone()
+    except pyodbc.Error as e:
+        rows = e
+    finally:
+        cursor.close()
+        cnxn.close()
+        return rows
+
 
 config = {
     'server': sys.argv[1],
@@ -37,4 +44,4 @@ config = {
 }
 
 result = execute_select_sql(sys.argv[5], config)
-print(str(result).replace('\'', '"'))
+print(ascii(str(result).replace('\'', '"')))
