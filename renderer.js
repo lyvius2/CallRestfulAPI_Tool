@@ -33,7 +33,8 @@ ipc.on('execute-sql-reply', function (event, arg) {
 	}
 })
 
-executeApiBtn.addEventListener('click', function () {
+executeApiBtn.addEventListener('click', function (event) {
+	event.preventDefault()
 	let idx_array = [], as_is_arg_name = [], to_be_arg_name = []
 	let api_url = document.querySelector('input#url').value
 	document.querySelectorAll('input[type=checkbox]').forEach(function (item, index) {
@@ -88,6 +89,7 @@ executeBackBtn.addEventListener('click', function () {
 	let new_query_result_div = document.createElement('div')
 	new_query_result_div.setAttribute('id', 'query-result')
 	query_result_view[0].insertBefore(new_query_result_div, query_result_view[0].childNodes[1])
+	ipc.send('stop-process')
 })
 
 function returnDbConfig (config) {

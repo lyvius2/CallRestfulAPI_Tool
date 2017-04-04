@@ -106,6 +106,8 @@ app.on('activate', () => {
 
 const ipc = require('electron').ipcMain
 const dialog = require('electron').dialog
+const queryString = require('query-string')
+const async = require('async')
 
 function showInfoMessageBox (title, msg) {
 	const options = {
@@ -122,6 +124,10 @@ function validateQuery (query) {
 	if (select_word_idx > -1 && (from_word_idx > select_word_idx)) return true
 	else return false
 }
+
+ipc.on('stop-process', function () {
+	process.exit()
+})
 
 ipc.on('show-message-box', function (event, arg) {
 	showInfoMessageBox(arg['title'], arg['msg'])
@@ -158,20 +164,28 @@ ipc.on('execute-api', function (event, arg) {
 	}
 
 	function createArgv (item) {
-		if (!is_param_url) {
-			return [arg['method'], arg['url'], JSON.stringify(item)];
-		} else {
-			let url = arg['url'].replace('{' + param_url + '}', item[param_url])
+		let url = arg['url']
+		if (is_param_url) {
+			url = arg['url'].replace('{' + param_url + '}', item[param_url])
 			delete item[param_url]
-			return [arg['method'], url, JSON.stringify(item)]
 		}
+		return [arg['method'], url, arg['method'] == 'get'?queryString.stringify(item):JSON.stringify(item)]
 	}
 
+	let work_list = []
 	arg['params'].forEach(function (item, index) {
-		runPythonScript('requester.py', createArgv(item), function (data) {
-			data['index'] = index
-			event.sender.send('execute-api-reply', data)
+		let args = createArgv(item)
+		work_list.push(function (callback) {
+			runPythonScript('requester.py', args, function (data) {
+				data['index'] = index
+				event.sender.send('execute-api-reply', data)
+				return callback(null, data)
+			})
 		})
+	})
+
+	async.series(work_list, function (errors, results) {
+		console.log('results', results.length)
 	})
 })
 
@@ -185,10 +199,10 @@ function runPythonScript (filename, argv, callback) {
 		scriptPath: './py',
 		args: argv
 	}
-	python.run(filename, options, function (err, data) {
+	python.run(filename, options, function (err, result_data) {
 		try {
 			if (err) throw err
-			let decoded_result = eval(decodeURIComponent(data))
+			let decoded_result = eval(decodeURIComponent(result_data))
 			return callback({success: true, result: decoded_result})
 		} catch (e) {
 			return callback({success: false, err: e})
