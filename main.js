@@ -126,7 +126,7 @@ function validateQuery (query) {
 }
 
 ipc.on('stop-process', function () {
-	process.exit()
+	//process.exit(1)
 })
 
 ipc.on('show-message-box', function (event, arg) {
@@ -196,7 +196,7 @@ function runPythonScript (filename, argv, callback) {
 		mode: 'text',
 		pythonPath: '',
 		pythonOptions: ['-u'],
-		scriptPath: './py',
+		scriptPath: path.join(__dirname, 'py'),
 		args: argv
 	}
 	python.run(filename, options, function (err, result_data) {
