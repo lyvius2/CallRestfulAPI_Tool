@@ -1,4 +1,5 @@
 const shell = require('electron').shell
+const storage = require('electron-json-storage')
 const links = document.querySelectorAll('a[href]')
 
 Array.prototype.forEach.call(links, function (link) {
@@ -19,6 +20,11 @@ let query_result;
 
 executeSqlBtn.addEventListener('click', function () {
 	const config = new returnDbConfig(document.forms.sql)
+	if (document.getElementById('save_config').checked) {
+		storage.set('dbConfig', config, function (err) { if (err) console.error(err) })
+	} else {
+		storage.remove('dbConfig', function (err) { if (err) console.error(err) })
+	}
 	if (!chkExistEmptyValue(config)) ipc.send('execute-sql', config)
 	else ipc.send('show-message-box', {title: '입력값 체크', msg: '입력항목 중 빈 값이 있습니다. 빈 값은 허용하지 않습니다.'})
 })
@@ -30,6 +36,13 @@ ipc.on('execute-sql-reply', function (event, arg) {
 		document.querySelector('.js-nav').classList.remove('is-shown')
 		document.querySelector('.js-content#sql').classList.remove('is-shown')
 		document.querySelector('.js-content#result').classList.add('is-shown')
+		storage.get('apiUrl', function (err, data) {
+			if (err) {
+				console.error(err)
+			} else if (typeof data['url'] != 'undefined') {
+				document.querySelector('input#url').value = data['url']
+			}
+		})
 	}
 })
 
@@ -37,7 +50,7 @@ executeApiBtn.addEventListener('click', function (event) {
 	event.preventDefault()
 	let idx_array = [], as_is_arg_name = [], to_be_arg_name = []
 	let api_url = document.querySelector('input#url').value
-	document.querySelectorAll('input[type=checkbox]').forEach(function (item, index) {
+	document.querySelectorAll('table input[type=checkbox]').forEach(function (item, index) {
 		if (item.checked) idx_array.push(index)
 	})
 	let text_input_array = document.querySelectorAll('.params')
@@ -55,6 +68,12 @@ executeApiBtn.addEventListener('click', function (event) {
 			prev.push(param)
 			return prev
 		}, [])
+
+		if (document.getElementById('save_url').checked) {
+			storage.set('apiUrl', {url: api_url}, function (err) { if (err) console.error(err) })
+		} else {
+			storage.remove('apiUrl', function (err) { if (err) console.error(err) })
+		}
 
 		ipc.send('execute-api', {
 			method: document.querySelector('select#method').value,
@@ -126,6 +145,15 @@ function validateUrlFormat (address) {
 function init () {
 	document.querySelector('.js-nav').classList.add('is-shown')
 	document.querySelector('.js-content#sql').classList.add('is-shown')
+	storage.get('dbConfig', function (err, data) {
+		if (err) {
+			console.error(err)
+		} else if (data != null) {
+			for (var value in data) {
+				if (value != 'query') document.getElementById(value).value = data[value]
+			}
+		}
+	})
 }
 
 init()
