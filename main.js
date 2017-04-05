@@ -106,8 +106,9 @@ app.on('activate', () => {
 
 const ipc = require('electron').ipcMain
 const dialog = require('electron').dialog
-const queryString = require('query-string')
+const querystring = require('querystring')
 const async = require('async')
+var async_function_exec_break = false
 
 function showInfoMessageBox (title, msg) {
 	const options = {
@@ -126,7 +127,7 @@ function validateQuery (query) {
 }
 
 ipc.on('stop-process', function () {
-	//process.exit(1)
+	async_function_exec_break = true
 })
 
 ipc.on('show-message-box', function (event, arg) {
@@ -169,7 +170,7 @@ ipc.on('execute-api', function (event, arg) {
 			url = arg['url'].replace('{' + param_url + '}', item[param_url])
 			delete item[param_url]
 		}
-		return [arg['method'], url, arg['method'] == 'get'?queryString.stringify(item):JSON.stringify(item)]
+		return [arg['method'], url, arg['method'] == 'get'?querystring.stringify(item):JSON.stringify(item)]
 	}
 
 	let work_list = []
@@ -177,6 +178,7 @@ ipc.on('execute-api', function (event, arg) {
 		let args = createArgv(item)
 		work_list.push(function (callback) {
 			runPythonScript('requester.py', args, function (data) {
+				if (async_function_exec_break) return callback(new Error())
 				data['index'] = index
 				event.sender.send('execute-api-reply', data)
 				return callback(null, data)
@@ -185,6 +187,7 @@ ipc.on('execute-api', function (event, arg) {
 	})
 
 	async.series(work_list, function (errors, results) {
+		async_function_exec_break = true
 		console.log('results', results.length)
 	})
 })

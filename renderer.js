@@ -103,11 +103,13 @@ executeBackBtn.addEventListener('click', function () {
 	document.querySelector('.js-content#result').classList.remove('is-shown')
 	document.querySelector('.js-nav').classList.add('is-shown')
 	document.querySelector('.js-content#sql').classList.add('is-shown')
+	// 기존 결과 table DOM 삭제
 	let query_result_view = document.getElementsByClassName('demo-wide-wrapper')
 	query_result_view[0].removeChild(query_result_view[0].childNodes[1])
 	let new_query_result_div = document.createElement('div')
 	new_query_result_div.setAttribute('id', 'query-result')
 	query_result_view[0].insertBefore(new_query_result_div, query_result_view[0].childNodes[1])
+	// 수행 중 process 중지 요청
 	ipc.send('stop-process')
 })
 
