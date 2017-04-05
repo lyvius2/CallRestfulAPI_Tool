@@ -16,7 +16,7 @@ const ipc = require('electron').ipcRenderer
 const executeSqlBtn = document.getElementById('execute-sql')
 const executeApiBtn = document.getElementById('execute-api')
 const executeBackBtn = document.getElementById('execute-back')
-let query_result;
+let query_result, current_count;
 
 executeSqlBtn.addEventListener('click', function () {
 	const config = new returnDbConfig(document.forms.sql)
@@ -36,6 +36,7 @@ ipc.on('execute-sql-reply', function (event, arg) {
 		document.querySelector('.js-nav').classList.remove('is-shown')
 		document.querySelector('.js-content#sql').classList.remove('is-shown')
 		document.querySelector('.js-content#result').classList.add('is-shown')
+		document.querySelector('span#total').textContent = query_result.length
 		storage.get('apiUrl', function (err, data) {
 			if (err) {
 				console.error(err)
@@ -90,6 +91,8 @@ executeApiBtn.addEventListener('click', function (event) {
 })
 
 ipc.on('execute-api-reply', function (event, arg) {
+	current_count ++
+	document.querySelector('span#current').textContent = current_count + ' / '
 	if (arg.success) {
 		document.querySelector('tr:nth-child(' + (arg.index + 1) + ') td:last-child').classList.add('next')
 		document.querySelector('tr:nth-child(' + (arg.index + 1) + ') td:last-child').textContent = arg.result
@@ -101,14 +104,14 @@ ipc.on('execute-api-reply', function (event, arg) {
 
 executeBackBtn.addEventListener('click', function () {
 	document.querySelector('.js-content#result').classList.remove('is-shown')
-	document.querySelector('.js-nav').classList.add('is-shown')
-	document.querySelector('.js-content#sql').classList.add('is-shown')
+	init()
+	document.querySelector('#current, #total').textContent = ''
 	// 기존 결과 table DOM 삭제
 	let query_result_view = document.getElementsByClassName('demo-wide-wrapper')
-	query_result_view[0].removeChild(query_result_view[0].childNodes[1])
+	query_result_view[0].removeChild(query_result_view[0].childNodes[3])
 	let new_query_result_div = document.createElement('div')
 	new_query_result_div.setAttribute('id', 'query-result')
-	query_result_view[0].insertBefore(new_query_result_div, query_result_view[0].childNodes[1])
+	query_result_view[0].insertBefore(new_query_result_div, query_result_view[0].childNodes[3])
 	// 수행 중 process 중지 요청
 	ipc.send('stop-process')
 })
@@ -147,18 +150,20 @@ function validateUrlFormat (address) {
 function init () {
 	document.querySelector('.js-nav').classList.add('is-shown')
 	document.querySelector('.js-content#sql').classList.add('is-shown')
-	storage.get('dbConfig', function (err, data) {
-		if (err) {
-			console.error(err)
-		} else if (data != null) {
-			for (var value in data) {
-				if (value != 'query') document.getElementById(value).value = data[value]
-			}
-		}
-	})
+	current_count = 0
 }
 
 init()
+
+storage.get('dbConfig', function (err, data) {
+	if (err) {
+		console.error(err)
+	} else if (data != null) {
+		for (var value in data) {
+			if (value != 'query') document.getElementById(value).value = data[value]
+		}
+	}
+})
 
 const Vue = require('vue')
 
