@@ -187,7 +187,8 @@ ipc.on('execute-api', function (event, arg) {
 	})
 
 	async.series(work_list, function (errors, results) {
-		async_function_exec_break = true
+		async_function_exec_break = false
+		if (errors) console.error('errors', errors)
 		console.log('results', results.length)
 	})
 })
