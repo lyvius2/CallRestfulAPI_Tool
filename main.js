@@ -136,7 +136,7 @@ ipc.on('show-message-box', function (event, arg) {
 
 ipc.on('execute-sql', function (event, arg) {
 	if (validateQuery(arg['query'])) {
-		let argv = [arg['host'], arg['database'], arg['username'], arg['password'], arg['query']]
+		let argv = [arg['host'], arg['database'], arg['username'], arg['password'], arg['query'], 'Selector' + arg['dbms']]
 		runPythonScript('selector.py', argv, function (data) {
 			try {
 				if (!data.success) throw data.err
