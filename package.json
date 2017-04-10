@@ -5,11 +5,12 @@
     "electron": "^1.6.4",
     "electron-json-storage": "^3.0.4",
     "python-shell": "^0.4.0",
+    "request": "^2.81.0",
     "vue": "^2.2.6"
   },
   "scripts": {
     "start": "electron .",
-    "build": "electron-packager . --platform win32 --arch x64 --out dist/",
+    "build": "electron-packager . --platform win32 --arch x64 --out dist/ --overwrite",
     "setup": "electron-installer-windows --src dist/RestfulAPI_Tool-win32-x64/ --dest dist/installers/"
   },
   "main": "main.js",
