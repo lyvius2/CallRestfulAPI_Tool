@@ -12,10 +12,12 @@ Array.prototype.forEach.call(links, function (link) {
 	}
 })
 
+const indicator = require('./assets/javascripts/indicator')
 const ipc = require('electron').ipcRenderer
 const executeSqlBtn = document.getElementById('execute-sql')
 const executeApiBtn = document.getElementById('execute-api')
 const executeBackBtn = document.getElementById('execute-back')
+
 let query_result, current_count;
 
 executeSqlBtn.addEventListener('click', function () {
@@ -25,11 +27,15 @@ executeSqlBtn.addEventListener('click', function () {
 	} else {
 		storage.remove('dbConfig', function (err) { if (err) console.error(err) })
 	}
-	if (!chkExistEmptyValue(config)) ipc.send('execute-sql', config)
+	if (!chkExistEmptyValue(config)) {
+		ipc.send('execute-sql', config)
+		indicator.view()
+	}
 	else ipc.send('show-message-box', {title: '입력값 체크', msg: '입력항목 중 빈 값이 있습니다. 빈 값은 허용하지 않습니다.'})
 })
 
 ipc.on('execute-sql-reply', function (event, arg) {
+	indicator.hide()
 	if (arg.success) {
 		query_result = arg.result
 		viewQueryResult(query_result)
@@ -77,6 +83,7 @@ executeApiBtn.addEventListener('click', function (event) {
 		}
 
 		ipc.send('execute-api', {
+			module: document.querySelector('select#module').value,
 			method: document.querySelector('select#method').value,
 			url: api_url,
 			params: params,
@@ -164,6 +171,8 @@ storage.get('dbConfig', function (err, data) {
 		}
 	}
 })
+
+ipc.send('confirm-python-version')
 
 const Vue = require('vue')
 

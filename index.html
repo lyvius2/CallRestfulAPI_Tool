@@ -8,6 +8,7 @@
 	<link rel="stylesheet" href="assets/css/nav.css">
 	<link rel="stylesheet" href="assets/css/section.css">
 	<link rel="stylesheet" href="assets/css/demo.css">
+	<link rel="stylesheet" href="assets/css/indicator/jquery.loadingModal.min.css">
 	<style>
 		table {
 			font: 12px "Lucida Grande", Helvetica, Arial, sans-serif;
@@ -36,9 +37,6 @@
 				</h5>
 				<select class="nav-input" name="dbms" id="dbms">
 					<option value="MsSql">MS SQL Server</option>
-					<!--
-					<option value="Oracle">ORACLE DBMS</option>
-					-->
 					<option value="PgSql">PostgreSQL</option>
 				</select>
 			</div>
@@ -118,6 +116,13 @@
 					<h3>쿼리 결과를 확인하세요.</h3>
 					<p>Restful URL에 파라메터가 포함되어 있는 경우에는 파라메터 항목을 중괄호로 감싸 URL에 입력하십시오.<br/>
 						<code>예) URL에 'IDX'라는 파라메터가 포함될 경우. http://fakeURL.com/{IDX}.do</code></p>
+					<p>
+						MODULE
+						<select name="module" id="module">
+							<option value="node.js">Node.js</option>
+							<option value="python">Python</option>
+						</select>
+					</p>
 					<p>
 						METHOD
 						<select name="method" id="method">
