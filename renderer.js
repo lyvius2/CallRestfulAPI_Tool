@@ -50,6 +50,7 @@ ipc.on('execute-sql-reply', function (event, arg) {
 				document.querySelector('input#url').value = data['url']
 			}
 		})
+		$('#result').scrollTop(0)
 	}
 })
 
