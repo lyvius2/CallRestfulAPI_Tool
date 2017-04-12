@@ -16,9 +16,24 @@ const indicator = require('./assets/javascripts/indicator')
 const ipc = require('electron').ipcRenderer
 const executeSqlBtn = document.getElementById('execute-sql')
 const executeApiBtn = document.getElementById('execute-api')
+const executeStopBtn = document.getElementById('execute-stop')
 const executeBackBtn = document.getElementById('execute-back')
 
 let query_result, current_count;
+
+ipc.on('view-indicator', indicator.view)
+ipc.on('hide-indicator', indicator.hide)
+ipc.on('view-stop-button', function () {
+	executeStopBtn.style.display = 'inline'
+	executeApiBtn.style.display = 'none'
+	current_count = 0
+	document.querySelector('span#current').textContent = current_count + ' / '
+})
+ipc.on('complete-api-request', function () {
+	executeStopBtn.style.display = 'none'
+	executeApiBtn.style.display = 'inline'
+	$('#result').scrollTop(0)
+})
 
 executeSqlBtn.addEventListener('click', function () {
 	const config = new returnDbConfig(document.forms.sql)
@@ -27,15 +42,11 @@ executeSqlBtn.addEventListener('click', function () {
 	} else {
 		storage.remove('dbConfig', function (err) { if (err) console.error(err) })
 	}
-	if (!chkExistEmptyValue(config)) {
-		ipc.send('execute-sql', config)
-		indicator.view()
-	}
+	if (!chkExistEmptyValue(config)) ipc.send('execute-sql', config)
 	else ipc.send('show-message-box', {title: '입력값 체크', msg: '입력항목 중 빈 값이 있습니다. 빈 값은 허용하지 않습니다.'})
 })
 
 ipc.on('execute-sql-reply', function (event, arg) {
-	indicator.hide()
 	if (arg.success) {
 		query_result = arg.result
 		viewQueryResult(query_result)
@@ -110,6 +121,10 @@ ipc.on('execute-api-reply', function (event, arg) {
 	}
 })
 
+executeStopBtn.addEventListener('click', function() {
+	ipc.send('stop-process')
+})
+
 executeBackBtn.addEventListener('click', function () {
 	document.querySelector('.js-content#result').classList.remove('is-shown')
 	init()
@@ -123,6 +138,8 @@ executeBackBtn.addEventListener('click', function () {
 	// 수행 중 process 중지 요청
 	ipc.send('stop-process')
 })
+
+document.querySelector('#dbms').addEventListener('change', viewOrHideMsSqlNotice)
 
 function returnDbConfig (config) {
 	this.host = config['host'].value
@@ -155,10 +172,23 @@ function validateUrlFormat (address) {
 	return is_valid_url_format
 }
 
+// MS SQL Server 안내문 표시 여부
+function viewOrHideMsSqlNotice () {
+	let notice = document.querySelectorAll('.ms-sql-notice')
+	if (document.querySelector('#dbms').value == 'MsSql') {
+		notice[0].style.display = 'block'
+		notice[1].style.display = 'block'
+	} else {
+		notice[0].style.display = 'none'
+		notice[1].style.display = 'none'
+	}
+}
+
 function init () {
 	document.querySelector('.js-nav').classList.add('is-shown')
 	document.querySelector('.js-content#sql').classList.add('is-shown')
 	current_count = 0
+	viewOrHideMsSqlNotice()
 }
 
 init()
@@ -177,6 +207,7 @@ ipc.send('confirm-python-version')
 
 const Vue = require('vue')
 
+// 쿼리 결과 table DOM으로 렌더링
 function viewQueryResult (query_result) {
 	new Vue({
 		el: '#query-result',

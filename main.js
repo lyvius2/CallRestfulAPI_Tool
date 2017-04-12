@@ -172,6 +172,7 @@ function createInstallPipLib (lib_name) {
 ipc.on('execute-sql', function (event, arg) {
 	let module = arg['dbms']=='MsSql'?'pyodbc':'psycopg2'
 	if (validateQuery(arg['query'])) {
+		event.sender.send('view-indicator')
 		async.waterfall([createChkPipInstalled(module), createInstallPipLib(module)], function (errors, results) {
 			if (!errors) {
 				let argv = [arg['host'], arg['database'], arg['username'], arg['password'], arg['query'], 'Selector' + arg['dbms']]
@@ -183,10 +184,13 @@ ipc.on('execute-sql', function (event, arg) {
 					} catch (e) {
 						dialog.showErrorBox('SQL 문을 수행하는 도중 오류가 발생하였습니다.',
 							e.toString() + '\nResponse Msg : ' + data['result'])
+					} finally {
+						event.sender.send('hide-indicator')
 					}
 				})
 			} else {
 				dialog.showErrorBox('라이브러리 에러', `${module} 모듈의 설치가 잘못되었거나 확인이 되지 않습니다.`)
+				event.sender.send('hide-indicator')
 			}
 		})
 	} else showInfoMessageBox('SQL 쿼리 체크', '조회 쿼리만 수행 가능합니다. 쿼리문에 SELECT와 FROM 키워드를 확인하세요.')
@@ -243,12 +247,36 @@ ipc.on('execute-api', function (event, arg) {
 		})
 	})
 
+	let final_callback = function (errors, results) {
+		let results_length =
+			(results.length == 4)?results.reduce(function (prev, curr) { return prev + curr }, 0):results.length
+		event.sender.send('complete-api-request')
+		if (!errors) showInfoMessageBox('실행 완료', `Restful API ${results_length} 건 실행 완료되었습니다.`)
+		else {
+			console.error('errors', errors)
+			dialog.showErrorBox('실행 중지', 'API 실행이 중지되었습니다.')
+		}
+	}
+
 	let final_act = function () {
-		async.series(work_list, function (errors, results) {
-			if (errors) console.error('errors', errors)
-			console.log('results', results.length)
-			async_function_exec_break = false
-		})
+		event.sender.send('view-stop-button')
+		// thread 4개로 수행
+		if (work_list.length > 3) {
+			let final_work_list = []
+			let unit = Math.floor(work_list.length / 3)
+			for (var i = 0; i < 4; i++) {
+				let works = work_list.slice(i*unit, (i+1)*unit)
+				final_work_list.push(function (callback) {
+					async.series(works, function (errors, results){
+						if (async_function_exec_break) return callback(new Error())
+						return callback(errors, results.length)
+					})
+				})
+			}
+			async.parallel(final_work_list, final_callback)
+		} else {
+			async.series(work_list, final_callback)
+		}
 	}
 
 	if (arg['module'] == 'python') {
